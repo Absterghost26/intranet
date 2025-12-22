@@ -1,29 +1,59 @@
 <?php
 
+require_once __DIR__ . "/../config/db.php";
+
 class Usuario {
 
-    private $conexion;
+    private $db;
 
     public function __construct() {
-        $this->conexion = new mysqli("127.0.0.1", "root", "", "intranet", 3307);
-
-        if ($this->conexion->connect_error) {
-            die("Error de conexión: " . $this->conexion->connect_error);
-        }
+        global $conexion;
+        $this->db = $conexion;
     }
+
 
     public function validar($email, $password) {
 
-        $stmt = $this->conexion->prepare(
-            "SELECT usuario FROM datosPersonales 
-             INNER JOIN usuarios USING(usuario)
-             WHERE email = ? AND clave = ?"
-        );
+        $sql = "SELECT id, email, rol, clave, estado, debe_cambiar_clave
+                FROM usuarios
+                WHERE email = ?
+                LIMIT 1";
 
-        $stmt->bind_param("ss", $email, $password);
+        $stmt = $this->db->prepare($sql);
+
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param("s", $email);
         $stmt->execute();
-        $stmt->store_result();
 
-        return $stmt->num_rows > 0;
+        $resultado = $stmt->get_result();
+
+        if ($resultado->num_rows !== 1) {
+            return false;
+        }
+
+        $usuario = $resultado->fetch_assoc();
+
+        if ($usuario["estado"] != 1) {
+            return false;
+        }
+
+        if (!password_verify($password, $usuario["clave"])) {
+            return false;
+        }
+
+        $this->actualizarUltimoLogin($usuario["id"]);
+
+        return $usuario;
+    }
+
+
+    private function actualizarUltimoLogin($usuario_id) {
+        $sql = "UPDATE usuarios SET ultimo_login = NOW() WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $usuario_id);
+        $stmt->execute();
     }
 }

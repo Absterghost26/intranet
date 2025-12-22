@@ -1,12 +1,8 @@
 <?php
+require_once __DIR__ . "/config/db.php";
 
 function obtenerUsuariosConCategorias() {
-
-    $conexion = mysqli_connect("127.0.0.1", "root", "", "intranet", 3307);
-
-    if (!$conexion) {
-        die("Error de conexión: " . mysqli_connect_error());
-    }
+    global $conexion;
 
     $sql = "
         SELECT 
@@ -23,7 +19,7 @@ function obtenerUsuariosConCategorias() {
     $resultado = mysqli_query($conexion, $sql);
 
     if (!$resultado) {
-        die("Error en la consulta SQL");
+        die("Error en la consulta SQL: " . mysqli_error($conexion));
     }
 
     return $resultado;

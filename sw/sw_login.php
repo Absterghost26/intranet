@@ -1,23 +1,28 @@
 <?php
-session_start();
-require_once "../clases/Usuario.php";
+require_once __DIR__ . "/../config/auth.php";
+require_once __DIR__ . "/../clases/Usuario.php";
 
 $usuarioObj = new Usuario();
 
-if (isset($_POST["email"]) && isset($_POST["password"])) {
+if (!isset($_POST["email"], $_POST["password"])) {
+    header("Location: ../index.php?error=2");
+    exit;
+}
 
-    if ($usuarioObj->validar($_POST["email"], $_POST["password"])) {
+$usuario = $usuarioObj->validar($_POST["email"], $_POST["password"]);
 
-        $_SESSION["usuario"] = $_POST["email"];
-        header("Location: ../inicio.php");
-        exit;
+if ($usuario) {
 
-    } else {
-        header("Location: ../index.php?error=1");
-        exit;
-    }
+    $_SESSION["usuario_id"] = $usuario["id"];
+    $_SESSION["email"]      = $usuario["email"];
+    $_SESSION["rol"]        = $usuario["rol"];
+
+    $_SESSION["flash"] = "Bienvenido {$usuario['email']}";
+
+    header("Location: ../inicio.php");
+    exit;
 
 } else {
-    header("Location: ../index.php?error=2");
+    header("Location: ../index.php?error=1");
     exit;
 }
