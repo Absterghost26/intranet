@@ -5,14 +5,21 @@ USE intranet;
 CREATE TABLE usuarios(
     id int AUTO_INCREMENT PRIMARY KEY,
     email varchar(100) NOT NULL UNIQUE,
+
     clave varchar(255) NOT NULL,
+    clave_pendiente varchar(255) NULL,
+
     rol ENUM('admin','usuario','supervisor') DEFAULT 'usuario',
     estado TINYINT(1) DEFAULT 1,
     debe_cambiar_clave TINYINT(1) DEFAULT 1,
+
     token_activacion varchar(64) NULL,
+    fecha_token DATETIME NULL,
+
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     ultimo_login DATETIME NULL
 ) ENGINE=InnoDB;
+
 
 CREATE TABLE datosPersonales(
     id int AUTO_INCREMENT PRIMARY KEY,

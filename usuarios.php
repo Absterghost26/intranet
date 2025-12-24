@@ -33,25 +33,26 @@ $resultado = $conexion->query($sql);
 
             <table class="table table-striped align-middle">
                 <thead class="table-dark">
-                    <tr>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th>Fecha creación</th>
-                        <?php if ($_SESSION['rol'] === 'admin'): ?>
-                            <th>Acciones</th>
-                        <?php endif; ?>
-                    </tr>
+                <tr>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Fecha creación</th>
+                    <?php if ($_SESSION['rol'] === 'admin'): ?>
+                        <th>Acciones</th>
+                    <?php endif; ?>
+                </tr>
                 </thead>
                 <tbody>
+
                 <?php while ($u = $resultado->fetch_assoc()): ?>
                     <tr>
                         <td><?= htmlspecialchars($u['email']) ?></td>
                         <td><?= ucfirst($u['rol']) ?></td>
                         <td>
-                            <?= $u['estado'] ? 
-                                '<span class="badge bg-success">Activo</span>' :
-                                '<span class="badge bg-danger">Inactivo</span>' ?>
+                            <?= $u['estado']
+                                ? '<span class="badge bg-success">Activo</span>'
+                                : '<span class="badge bg-danger">Inactivo</span>' ?>
                         </td>
                         <td><?= date("d/m/Y", strtotime($u['fecha_creacion'])) ?></td>
 
@@ -61,15 +62,11 @@ $resultado = $conexion->query($sql);
                                class="btn btn-sm btn-warning">
                                 Editar
                             </a>
-                            <a href="/intranet/admin/usuarios_eliminar.php?id=<?= $u['id'] ?>"
-                               class="btn btn-sm btn-danger"
-                               onclick="return confirm('¿Eliminar usuario?')">
-                                Eliminar
-                            </a>
                         </td>
                         <?php endif; ?>
                     </tr>
                 <?php endwhile; ?>
+
                 </tbody>
             </table>
 
@@ -78,6 +75,58 @@ $resultado = $conexion->query($sql);
 
 </div>
 
+<!-- ================= MODAL USUARIO CREADO ================= -->
+<?php if (isset($_SESSION['nuevo_usuario'])): ?>
+<div class="modal fade" id="modalUsuario" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Usuario creado correctamente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <p class="mb-1"><strong>Correo electrónico</strong></p>
+        <div class="alert alert-light text-center">
+            <?= htmlspecialchars($_SESSION['nuevo_usuario']['email']) ?>
+        </div>
+
+        <p class="mb-1"><strong>Contraseña temporal</strong></p>
+        <div class="alert alert-secondary text-center fw-bold fs-5">
+            <?= $_SESSION['nuevo_usuario']['password'] ?>
+        </div>
+
+        <p class="text-muted small mb-0">
+            Esta información deberá enviarse al usuario.<br>
+            Se solicitará cambio de contraseña en el primer acceso.
+        </p>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-bs-dismiss="modal">
+            Entendido
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
 <script src="assets/dist/js/bootstrap.bundle.min.js"></script>
+
+<?php if (isset($_SESSION['nuevo_usuario'])): ?>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
+    modal.show();
+});
+</script>
+<?php unset($_SESSION['nuevo_usuario']); ?>
+<?php endif; ?>
+
 </body>
 </html>
